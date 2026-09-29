@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PP Marcações — Painel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Firebase (base de dados gratuita e partilhada) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<!-- EmailJS (envio automático de emails, sem servidor próprio) -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  :root{
+    --ink:#241E18;
+    --green:#A81717;
+    --green-dark:#26201A;
+    --oxblood:#7A2323;
+    --brass:#9C7420;
+    --parchment:#D9D2C4;
+    --sage:#C7BDAB;
+    --card:#F1ECE0;
+    --line:#B7AC98;
+    --danger:#B23324;
+    --confirm:#2E6B3F;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--parchment);
+    color:var(--ink);
+    font-family:'Work Sans',sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Bebas Neue',sans-serif;
+    font-weight:400;
+    letter-spacing:.03em;
+    margin:0;
+    color:var(--green-dark);
+  }
+  .app{max-width:640px;margin:0 auto;padding:0 20px 60px;}
+  .header{padding:28px 0 0;}
+  .brandrow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .brand{
+    font-family:'UnifrakturCook',serif;font-weight:700;font-size:34px;
+    color:var(--green-dark);letter-spacing:.5px;
+    text-shadow:1px 1px 0 rgba(0,0,0,.12);
+  }
+  .tagline{font-size:14px;color:#5C5346;margin-top:4px;}
+  .stripe{
+    height:6px;margin:18px 0 22px;border-radius:2px;
+    background:repeating-linear-gradient(
+      -45deg,
+      var(--green) 0px, var(--green) 10px,
+      #000 10px, #000 20px,
+      var(--brass) 20px, var(--brass) 24px,
+      #000 24px, #000 28px
+    );
+  }
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;margin-bottom:16px;
+  }
+  .section-title{font-size:13px;font-weight:600;color:#6E6455;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+
+  .daylist{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;}
+  .daychip{
+    flex:0 0 auto;border:1px solid var(--line);background:var(--card);
+    border-radius:10px;padding:10px 14px;cursor:pointer;text-align:center;min-width:64px;
+    transition:background .15s ease,border-color .15s ease;
+  }
+  .daychip .dow{font-size:11.5px;color:#6E6455;text-transform:uppercase;letter-spacing:.04em;}
+  .daychip .dnum{font-family:'Bebas Neue',sans-serif;font-size:19px;font-weight:600;margin-top:2px;}
+  .daychip.selected{background:var(--green);border-color:var(--green);}
+  .daychip.selected .dow, .daychip.selected .dnum{color:#fff;}
+
+  .slotgrid{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .slot{
+    border:1px solid var(--line);background:var(--card);border-radius:8px;
+    padding:9px 14px;font-size:14.5px;cursor:pointer;font-weight:500;
+    transition:background .15s ease,border-color .15s ease,color .15s ease;
+  }
+  .slot:hover{border-color:var(--brass);}
+  .slot.selected{background:var(--brass);border-color:var(--brass);color:#fff;}
+  .empty-note{color:#6E6455;font-size:14.5px;padding:6px 0;}
+
+  label{display:block;font-size:13.5px;font-weight:600;color:var(--green-dark);margin:14px 0 6px;}
+  label:first-child{margin-top:0;}
+  input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],textarea,input[type=number]{
+    width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;
+    font-family:'Work Sans',sans-serif;font-size:15px;color:var(--ink);background:#FBF7EC;
+  }
+  input:focus,textarea:focus{outline:2px solid var(--brass);outline-offset:1px;border-color:var(--brass);}
+  textarea{resize:vertical;min-height:60px;}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    border:none;border-radius:8px;padding:12px 20px;font-family:'Work Sans',sans-serif;
+    font-size:15px;font-weight:600;cursor:pointer;transition:filter .15s ease, transform .05s ease;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--green);color:#fff;}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-primary:disabled{background:#B9C2B2;cursor:not-allowed;}
+  .btn-confirm{background:var(--confirm);color:#fff;}
+  .btn-reject{background:var(--danger);color:#fff;}
+  .btn-ghost{background:transparent;color:var(--green-dark);border:1px solid var(--line);}
+  .btn-sm{padding:8px 14px;font-size:13.5px;}
+
+  .req{border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:10px;background:#FBF7EC;}
+  .req .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;}
+  .req .who{font-weight:600;color:var(--green-dark);}
+  .req .when{font-family:'Bebas Neue',sans-serif;font-weight:600;color:var(--oxblood);}
+  .req .meta{font-size:13.5px;color:#5C5346;margin-top:4px;}
+  .req .note{font-size:13.5px;color:#5C5346;margin-top:6px;font-style:italic;}
+  .req .actions{display:flex;gap:8px;margin-top:12px;}
+
+  .pill{font-size:11.5px;padding:2px 8px;border-radius:20px;font-weight:600;}
+  .pill.blocked{background:var(--sage);color:var(--green-dark);}
+
+  .passgate{text-align:center;padding:20px 0;}
+  .passgate input{max-width:180px;margin:14px auto;text-align:center;letter-spacing:3px;font-size:18px;}
+  .error-text{color:var(--danger);font-size:13.5px;margin-top:6px;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media (max-width:480px){.grid2{grid-template-columns:1fr;}}
+
+  .footer-note{color:#6E6455;font-size:12.5px;text-align:center;margin-top:30px;}
+  .daysel{display:flex;gap:6px;flex-wrap:wrap;}
+  .daytoggle{
+    border:1px solid var(--line);background:#FBF7EC;border-radius:6px;padding:6px 10px;
+    font-size:13px;cursor:pointer;font-weight:600;color:#5C5346;
+  }
+  .daytoggle.on{background:var(--green);border-color:var(--green);color:#fff;}
+  .link-btn{background:none;border:none;color:var(--oxblood);font-size:13.5px;cursor:pointer;padding:0;text-decoration:underline;}
+  .loading{color:#6E6455;font-size:14.5px;padding:20px 0;text-align:center;}
+
+  .svcrow{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .svcrow input[type=text]{flex:2;}
+  .svcrow input[type=number]{flex:1;}
+  .svcrow .rm{background:none;border:none;color:var(--danger);font-size:13px;cursor:pointer;font-weight:600;white-space:nowrap;}
+  .add-svc{color:var(--green-dark);}
+
+  .blockeddate-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px;}
+  .blockeddate-row:last-child{border-bottom:none;}
+  .blockeddate-row .rm{background:none;border:none;color:var(--danger);font-size:13px;cursor:pointer;font-weight:600;}
+</style>
+</head>
+<body>
+<div id="root" class="app"><div class="loading">A preparar a agenda…</div></div>
+
+<script>
+const DOW = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MONTHS = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+const DEFAULT_SERVICES = [
+  {id:'corte', name:'Cabelo', minutes:50},
+  {id:'corte_barba', name:'Cabelo + Barba', minutes:70},
+  {id:'barba', name:'Barba', minutes:25}
+];
+
+const DEFAULT_CONFIG = {
+  barbershopName: 'PP Marcações',
+  address: '',
+  phone: '',
+  instagramUrl: 'https://www.instagram.com/pepzzzzzzz/',
+  barberEmail: '',
+  workDays: [2,3,4,5,6], // 0=domingo, 1=segunda, 2=terça...
+  locationsByDay: {2:'Marinha Grande', 3:'Leiria', 4:'Leiria', 5:'Marinha Grande', 6:'Leiria'},
+  startHour: 9,
+  endHour: 19,
+  slotStepMinutes: 15,
+  leadMinutes: 60,
+  passcode: '1234',
+  services: DEFAULT_SERVICES,
+  blockedDates: []
+};
+
+// ===== FIREBASE =====
+// Usa aqui o MESMO firebaseConfig que colocaste no index.html — ambos os ficheiros
+// têm de apontar ao mesmo projeto Firebase para partilharem os dados.
+const firebaseConfig = {
+  apiKey: "AIzaSyB2MVvXo7LlhFa4e8twBCqr0gGb0zXH2JY",
+  authDomain: "marcacoes-pp.firebaseapp.com",
+  projectId: "marcacoes-pp",
+  storageBucket: "marcacoes-pp.firebasestorage.app",
+  messagingSenderId: "1061204569418",
+  appId: "1:1061204569418:web:266e70c26f52327b40e5b3"
+};
+let fsDb = null;
+let configRef = null;
+let bookingsRef = null;
+let bookingsLoaded = false;
+let configLoaded = false;
+let firebaseUnavailable = false;
+
+// ===== EMAILJS (envio automático de emails) =====
+// Usa aqui os MESMOS valores que colocaste no index.html.
+const EMAILJS_PUBLIC_KEY = 'ZQKdCEaz_4oOX36RI';
+const EMAILJS_SERVICE_ID = 'service_5k8lt6p';
+const EMAILJS_CLIENT_TEMPLATE_ID = 'template_ye36iii';
+let emailjsReady = false;
+
+let data = null; // {config, bookings:[], blockedDates:[]}
+let barberUnlocked = false;
+let passInput = '';
+let passError = false;
+let showConfig = false;
+
+// vacation / block state
+let vacStart = '';
+let vacEnd = '';
+let blockRangeStart = '';
+let blockRangeEnd = '';
+let blockTimeFrom = '';
+let blockTimeTo = '';
+let lastEmail = null;
+let uiMessage = null;
+let confirmingCancelId = null;
+
+// reschedule state
+let editingBookingId = null;
+let editDate = null;
+let editTime = null;
+
+const root = document.getElementById('root');
+
+function pad(n){return n<10?'0'+n:''+n;}
+function dateKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function fmtDateLong(key){
+  const [y,m,d] = key.split('-').map(Number);
+  const dt = new Date(y,m-1,d);
+  return DOW[dt.getDay()]+', '+d+' '+MONTHS[m-1];
+}
+function timeStr(h,m){return pad(h)+':'+pad(m);}
+function formatDuration(mins){
+  if(mins>60){
+    const h = Math.floor(mins/60), m = mins%60;
+    return h+':'+pad(m)+'h';
+  }
+  return mins+' min';
+}
+function minutesFromTime(t){const [h,m]=t.split(':').map(Number); return h*60+m;}
+function esc(s){return (s||'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));}
+function overlaps(aStart,aDur,bStart,bDur){ return aStart < bStart+bDur && bStart < aStart+aDur; }
+
+function initFirebase(){
+  try{
+    firebase.initializeApp(firebaseConfig);
+    fsDb = firebase.firestore();
+  }catch(e){
+    console.error('Firebase init failed', e);
+    firebaseUnavailable = true;
+    render();
+    return;
+  }
+  configRef = fsDb.collection('barbearia').doc('config');
+  bookingsRef = fsDb.collection('barbearia_bookings');
+
+  configRef.onSnapshot(snap=>{
+    data = data || {config:{...DEFAULT_CONFIG}, bookings:[], blockedDates:[]};
+    if(snap.exists){
+      data.config = {...DEFAULT_CONFIG, ...snap.data()};
+      if(!data.config.services || !data.config.services.length) data.config.services = DEFAULT_SERVICES;
+      if(!data.config.slotStepMinutes) data.config.slotStepMinutes = 15;
+      data.blockedDates = data.config.blockedDates || [];
+    } else {
+      data.config = {...DEFAULT_CONFIG};
+      data.blockedDates = [];
+      configRef.set({...DEFAULT_CONFIG}).catch(e=>console.error('config init failed', e));
+    }
+    configLoaded = true;
+    render();
+  }, err=>{
+    console.error('config listener error', err);
+    firebaseUnavailable = true;
+    render();
+  });
+
+  bookingsRef.onSnapshot(snap=>{
+    data = data || {config:{...DEFAULT_CONFIG}, bookings:[], blockedDates:[]};
+    data.bookings = snap.docs.map(doc=>({id: doc.id, ...doc.data()}));
+    bookingsLoaded = true;
+    render();
+  }, err=>{
+    console.error('bookings listener error', err);
+    firebaseUnavailable = true;
+    render();
+  });
+}
+
+function generateWorkDates(numDays, locationFilter){
+  const out = [];
+  const now = new Date();
+  let d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let guard = 0;
+  const maxGuard = locationFilter ? numDays*10+60 : numDays*6+30;
+  while(out.length < numDays && guard < maxGuard){
+    const k = dateKey(d);
+    const dow = d.getDay();
+    const isWorkday = data.config.workDays.includes(dow) && !data.blockedDates.includes(k);
+    const matchesLocation = !locationFilter || (data.config.locationsByDay||{})[dow] === locationFilter;
+    if(isWorkday && matchesLocation){
+      out.push(k);
+    }
+    d.setDate(d.getDate()+1);
+    guard++;
+  }
+  return out;
+}
+
+function existingIntervals(dateKeyStr, excludeId){
+  return data.bookings
+    .filter(b => b.date === dateKeyStr && b.id !== excludeId && (b.status === 'pending' || b.status === 'confirmed' || b.status === 'blocked'))
+    .map(b => ({start: minutesFromTime(b.time), dur: b.duration || data.config.slotStepMinutes}));
+}
+
+function generateSlots(dateKeyStr, durationMinutes, excludeId){
+  const cfg = data.config;
+  if(data.blockedDates.includes(dateKeyStr)) return [];
+  const slots = [];
+  const now = new Date();
+  const isToday = dateKeyStr === dateKey(now);
+  const leadCutoff = new Date(now.getTime() + cfg.leadMinutes*60000);
+  const busy = existingIntervals(dateKeyStr, excludeId);
+  const step = cfg.slotStepMinutes || 15;
+
+  let cur = cfg.startHour*60;
+  const end = cfg.endHour*60;
+  while(cur + durationMinutes <= end){
+    const h = Math.floor(cur/60), m = cur%60;
+    const label = timeStr(h,m);
+    const [yy,mm,dd] = dateKeyStr.split('-').map(Number);
+    const slotDate = new Date(yy, mm-1, dd, h, m);
+    let available = true;
+    if(isToday && slotDate < leadCutoff) available = false;
+    if(available && busy.some(bz => overlaps(cur, durationMinutes, bz.start, bz.dur))) available = false;
+    if(available) slots.push(label);
+    cur += step;
+  }
+  return slots;
+}
+
+function mailtoLink(to, subject, body){
+  return 'mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+}
+function openMail(to, subject, body){
+  const a = document.createElement('a');
+  a.href = mailtoLink(to, subject, body);
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+async function sendClientEmail(to, name, subject, body){
+  if(emailjsReady && EMAILJS_SERVICE_ID.indexOf('COLA_AQUI')===-1){
+    try{
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CLIENT_TEMPLATE_ID, {
+        to_email: to, to_name: name, subject: subject, message: body
+      });
+      return true;
+    }catch(e){
+      console.error('EmailJS client send failed', e);
+    }
+  }
+  openMail(to, subject, body);
+  return false;
+}
+
+function notify(msg){
+  uiMessage = msg;
+  render();
+}
+function copyText(text){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>{
+      notify('Copiado! Cola no teu email.');
+    }).catch(()=>{ fallbackCopy(text); });
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); notify('Copiado! Cola no teu email.'); }
+  catch(e){ notify('Não foi possível copiar automaticamente. Seleciona o texto manualmente.'); }
+  document.body.removeChild(ta);
+}
+
+async function decideBooking(id, decision){
+  const b = data.bookings.find(x=>x.id===id);
+  if(!b) return;
+  try{
+    await bookingsRef.doc(id).update({status: decision});
+  }catch(e){
+    console.error('decide failed', e);
+    notify('Não foi possível guardar a decisão. Tenta novamente.');
+    return;
+  }
+  const cfg = data.config;
+  const when = fmtDateLong(b.date)+' às '+b.time;
+  let subject, body;
+  if(decision === 'confirmed'){
+    subject = 'Marcação confirmada — '+cfg.barbershopName;
+    body = 'Olá '+b.name+',\n\nA tua marcação de '+b.serviceName+' para '+when+' foi confirmada.\n\n'+
+      (cfg.address? 'Morada: '+cfg.address+'\n':'')+
+      (cfg.phone? 'Telefone: '+cfg.phone+'\n':'')+
+      '\nAté já!\n'+cfg.barbershopName;
+  } else {
+    subject = 'Marcação não confirmada — '+cfg.barbershopName;
+    body = 'Olá '+b.name+',\n\nInfelizmente não foi possível confirmar a tua marcação de '+b.serviceName+' para '+when+'.\n'+
+      'Escolhe outro horário disponível quando quiseres.\n\nPedimos desculpa pelo incómodo.\n'+cfg.barbershopName;
+  }
+  const sentAuto = await sendClientEmail(b.email, b.name, subject, body);
+  lastEmail = {to: b.email, subject, body, sent: sentAuto};
+  render();
+}
+
+function requestCancelBooking(id){
+  confirmingCancelId = id;
+  render();
+}
+
+function dismissCancelBooking(){
+  confirmingCancelId = null;
+  render();
+}
+
+async function cancelBooking(id){
+  const b = data.bookings.find(x=>x.id===id);
+  if(!b) return;
+  confirmingCancelId = null;
+  try{
+    await bookingsRef.doc(id).update({status: 'cancelled'});
+  }catch(e){
+    console.error('cancel failed', e);
+    notify('Não foi possível cancelar. Tenta novamente.');
+    return;
+  }
+  const cfg = data.config;
+  const when = fmtDateLong(b.date)+' às '+b.time;
+  const subject = 'Marcação cancelada — '+cfg.barbershopName;
+  const body = 'Olá '+b.name+',\n\nA tua marcação de '+b.serviceName+' para '+when+' foi cancelada.\n\n'+
+    'Se quiseres, marca outro horário quando te for melhor.\n\nPedimos desculpa pelo incómodo.\n'+cfg.barbershopName;
+  const sentAuto = await sendClientEmail(b.email, b.name, subject, body);
+  lastEmail = {to: b.email, subject, body, sent: sentAuto};
+  render();
+}
+
+function startEditBooking(id){
+  const b = data.bookings.find(x=>x.id===id);
+  editingBookingId = id;
+  editDate = b ? b.date : null;
+  editTime = null;
+  render();
+}
+
+function cancelEditBooking(){
+  editingBookingId = null;
+  editDate = null;
+  editTime = null;
+  render();
+}
+
+async function saveEditBooking(){
+  const b = data.bookings.find(x=>x.id===editingBookingId);
+  if(!b) return;
+  const targetDate = editDate || b.date;
+  if(!editTime){ notify('Escolhe uma hora antes de guardar.'); return; }
+  const svc = {minutes: b.duration};
+  const stillFree = generateSlots(targetDate, svc.minutes, b.id).includes(editTime);
+  if(!stillFree){ notify('Esse horário já não está livre. Escolhe outro.'); editTime=null; return; }
+  const oldWhen = fmtDateLong(b.date)+' às '+b.time;
+  const newWhen = fmtDateLong(targetDate)+' às '+editTime;
+  try{
+    await bookingsRef.doc(editingBookingId).update({date: targetDate, time: editTime});
+  }catch(e){
+    console.error('edit save failed', e);
+    notify('Não foi possível guardar a alteração. Tenta novamente.');
+    return;
+  }
+  const cfg = data.config;
+  const subject = 'Marcação alterada — '+cfg.barbershopName;
+  const body = 'Olá '+b.name+',\n\nA tua marcação de '+b.serviceName+' foi alterada de '+oldWhen+' para '+newWhen+'.\n\n'+
+    (cfg.address? 'Morada: '+cfg.address+'\n':'')+
+    (cfg.phone? 'Telefone: '+cfg.phone+'\n':'')+
+    '\nAté já!\n'+cfg.barbershopName;
+  const sentAuto = await sendClientEmail(b.email, b.name, subject, body);
+  lastEmail = {to: b.email, subject, body, sent: sentAuto};
+  editingBookingId = null; editDate = null; editTime = null;
+  render();
+}
+
+async function toggleBlock(dateKeyStr, time){
+  const step = data.config.slotStepMinutes || 15;
+  const existing = data.bookings.find(b=>b.date===dateKeyStr && b.time===time && b.status==='blocked');
+  if(existing){
+    try{ await bookingsRef.doc(existing.id).delete(); }
+    catch(e){ console.error('unblock failed', e); notify('Não foi possível desbloquear. Tenta novamente.'); return; }
+  } else {
+    try{
+      await bookingsRef.add({
+        date:dateKeyStr, time:time, duration:step, name:'Bloqueado', email:'', phone:'', note:'',
+        status:'blocked', createdAt:Date.now()
+      });
+    }catch(e){ console.error('block failed', e); notify('Não foi possível bloquear. Tenta novamente.'); return; }
+  }
+  render();
+}
+
+async function addTimeRangeBlock(){
+  if(!blockRangeStart || !blockTimeFrom || !blockTimeTo) return;
+  const endDateStr = blockRangeEnd || blockRangeStart;
+  const [sy,sm,sd] = blockRangeStart.split('-').map(Number);
+  const [ey,em,ed] = endDateStr.split('-').map(Number);
+  let d = new Date(sy,sm-1,sd);
+  const endD = new Date(ey,em-1,ed);
+  if(d > endD){ notify('A data de fim tem de ser igual ou posterior à data de início.'); return; }
+
+  const step = data.config.slotStepMinutes || 15;
+  const fromMin = minutesFromTime(blockTimeFrom);
+  const toMin = minutesFromTime(blockTimeTo);
+  if(toMin <= fromMin){ notify('A hora de fim tem de ser depois da hora de início.'); return; }
+
+  let guard = 0;
+  const batch = fsDb.batch();
+  let count = 0;
+  while(d <= endD && guard < 366){
+    const k = dateKey(d);
+    const busy = existingIntervals(k);
+    let cur = fromMin;
+    while(cur < toMin){
+      const label = timeStr(Math.floor(cur/60), cur%60);
+      const alreadyBlocked = data.bookings.some(b=>b.date===k && b.time===label && b.status==='blocked');
+      const takenByReal = busy.some(bz => overlaps(cur, step, bz.start, bz.dur));
+      if(!alreadyBlocked && !takenByReal){
+        const newRef = bookingsRef.doc();
+        batch.set(newRef, {
+          date:k, time:label, duration:step, name:'Bloqueado', email:'', phone:'', note:'',
+          status:'blocked', createdAt:Date.now()
+        });
+        count++;
+      }
+      cur += step;
+    }
+    d.setDate(d.getDate()+1);
+    guard++;
+  }
+  if(count===0){ blockRangeStart=''; blockRangeEnd=''; blockTimeFrom=''; blockTimeTo=''; render(); return; }
+  try{
+    await batch.commit();
+  }catch(e){
+    console.error('range block failed', e);
+    notify('Não foi possível guardar o bloqueio. Tenta novamente.');
+    return;
+  }
+  blockRangeStart=''; blockRangeEnd=''; blockTimeFrom=''; blockTimeTo='';
+  render();
+}
+
+async function addVacationBlock(){
+  if(!vacStart){ return; }
+  const endStr = vacEnd || vacStart;
+  const [sy,sm,sd] = vacStart.split('-').map(Number);
+  const [ey,em,ed] = endStr.split('-').map(Number);
+  let d = new Date(sy,sm-1,sd);
+  const endD = new Date(ey,em-1,ed);
+  if(d > endD){ return; }
+  let guard = 0;
+  const newBlocked = [...data.blockedDates];
+  while(d <= endD && guard < 366){
+    const k = dateKey(d);
+    if(!newBlocked.includes(k)) newBlocked.push(k);
+    d.setDate(d.getDate()+1);
+    guard++;
+  }
+  newBlocked.sort();
+  try{
+    await configRef.set({blockedDates: newBlocked}, {merge:true});
+  }catch(e){
+    console.error('vacation block failed', e);
+    notify('Não foi possível guardar o bloqueio. Tenta novamente.');
+    return;
+  }
+  vacStart = ''; vacEnd = '';
+  render();
+}
+
+async function removeBlockedDate(k){
+  const newBlocked = data.blockedDates.filter(x=>x!==k);
+  try{
+    await configRef.set({blockedDates: newBlocked}, {merge:true});
+  }catch(e){
+    console.error('unblock date failed', e);
+    notify('Não foi possível desbloquear esse dia. Tenta novamente.');
+    return;
+  }
+  render();
+}
+
+async function saveConfig(newCfg){
+  try{
+    await configRef.set(newCfg);
+  }catch(e){
+    console.error('save config failed', e);
+    notify('Não foi possível guardar as definições. Tenta novamente.');
+    return;
+  }
+  showConfig = false;
+  render();
+}
+
+// ---------- render ----------
+
+function render(){
+  if(firebaseUnavailable){
+    root.innerHTML = '<div class="header"><div class="brand">Painel indisponível</div>'+
+      '<div class="tagline" style="margin-top:10px;">Não foi possível ligar à base de dados. Verifica a configuração do Firebase (firebaseConfig) no código, ou a tua ligação à internet.</div></div>';
+    return;
+  }
+  if(!data || !configLoaded || !bookingsLoaded){ root.innerHTML = '<div class="loading">A preparar a agenda…</div>'; return; }
+  const cfg = data.config;
+  let html = '';
+  html += '<div class="header">';
+  html += '<div class="brandrow"><div><div class="brand">'+esc(cfg.barbershopName)+'</div>';
+  html += '<div class="tagline">Painel do barbeiro — uso interno</div></div></div>';
+  html += '<div class="stripe"></div></div>';
+
+  html += renderBarberView();
+
+  html += '<div class="footer-note">Painel privado — não partilhes este link.</div>';
+  root.innerHTML = html;
+  attachHandlers();
+}
+
+function renderBarberView(){
+  if(!barberUnlocked){
+    let html = '<div class="card passgate">';
+    html += '<h3>Área reservada</h3>';
+    html += '<p style="color:#5C5346;font-size:14.5px;margin-top:6px;">Introduz o código de acesso do barbeiro.</p>';
+    html += '<input type="text" id="pass-input" inputmode="numeric" maxlength="8" value="'+esc(passInput)+'">';
+    if(passError) html += '<div class="error-text">Código incorreto.</div>';
+    html += '<div><button class="btn btn-primary" data-action="unlock">Entrar</button></div>';
+    html += '</div>';
+    return html;
+  }
+
+  const pending = data.bookings.filter(b=>b.status==='pending').sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
+  const confirmed = data.bookings.filter(b=>b.status==='confirmed').sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
+  const blocked = data.bookings.filter(b=>b.status==='blocked').sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
+
+  let html = '';
+
+  if(uiMessage){
+    html += '<div class="card" style="border-color:var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;">';
+    html += '<span style="font-size:14.5px;">'+esc(uiMessage)+'</span>';
+    html += '<button class="link-btn" data-action="close-notify">Fechar</button>';
+    html += '</div>';
+  }
+
+  if(lastEmail){
+    if(lastEmail.sent){
+      html += '<div class="card" style="border-color:var(--confirm);display:flex;justify-content:space-between;align-items:center;gap:12px;">';
+      html += '<span style="font-size:14.5px;">✅ Email enviado automaticamente para '+esc(lastEmail.to)+'.</span>';
+      html += '<button class="link-btn" data-action="close-email">Fechar</button>';
+      html += '</div>';
+    } else {
+      html += '<div class="card" style="border-color:var(--brass);background:#EDE0BD;">';
+      html += '<div class="section-title">Não foi possível enviar automaticamente</div>';
+      html += '<p style="color:#5C5346;font-size:13.5px;margin:0 0 10px;">Abriu-se o teu email — se não abriu, copia o texto abaixo e envia manualmente.</p>';
+      html += '<label>Para</label><input type="text" id="email-to" readonly value="'+esc(lastEmail.to)+'">';
+      html += '<label>Assunto</label><input type="text" id="email-subject" readonly value="'+esc(lastEmail.subject)+'">';
+      html += '<label>Mensagem</label><textarea id="email-body" readonly rows="6">'+esc(lastEmail.body)+'</textarea>';
+      html += '<div class="actions" style="margin-top:12px;">';
+      html += '<button class="btn btn-primary btn-sm" data-action="copy-email">Copiar tudo</button>';
+      html += '<button class="btn btn-ghost btn-sm" data-action="reopen-email">Tentar abrir email outra vez</button>';
+      html += '<button class="btn btn-ghost btn-sm" data-action="close-email">Fechar</button>';
+      html += '</div></div>';
+    }
+  }
+
+  html += '<div class="card">';
+  html += '<div class="section-title">Pedidos pendentes ('+pending.length+')</div>';
+  if(pending.length===0){
+    html += '<div class="empty-note">Não há pedidos à espera de resposta.</div>';
+  } else {
+    pending.forEach(b=>{
+      html += '<div class="req">';
+      html += '<div class="top"><span class="who">'+esc(b.name)+'</span><span class="when">'+fmtDateLong(b.date)+' · '+b.time+'</span></div>';
+      html += '<div class="meta">'+esc(b.serviceName||'')+(b.location?' · 📍 '+esc(b.location):'')+' · '+esc(b.email)+(b.phone?' · '+esc(b.phone):'')+'</div>';
+      if(b.note) html += '<div class="note">"'+esc(b.note)+'"</div>';
+      html += '<div class="actions">';
+      html += '<button class="btn btn-confirm btn-sm" data-action="decide" data-id="'+b.id+'" data-decision="confirmed">Confirmar</button>';
+      html += '<button class="btn btn-reject btn-sm" data-action="decide" data-id="'+b.id+'" data-decision="rejected">Rejeitar</button>';
+      html += '</div></div>';
+    });
+  }
+  html += '</div>';
+
+  html += '<div class="card">';
+  html += '<div class="section-title">Próximas marcações confirmadas ('+confirmed.length+')</div>';
+  if(confirmed.length===0){
+    html += '<div class="empty-note">Ainda não há marcações confirmadas.</div>';
+  } else {
+    confirmed.forEach(b=>{
+      if(editingBookingId === b.id){
+        html += renderRescheduleCard(b);
+      } else {
+        html += '<div class="req">';
+        html += '<div class="top"><span class="who">'+esc(b.name)+'</span><span class="when">'+fmtDateLong(b.date)+' · '+b.time+'</span></div>';
+        html += '<div class="meta">'+esc(b.serviceName||'')+(b.location?' · 📍 '+esc(b.location):'')+' · '+esc(b.email)+(b.phone?' · '+esc(b.phone):'')+'</div>';
+        if(confirmingCancelId === b.id){
+          html += '<div class="note" style="color:var(--danger);font-style:normal;font-weight:600;">Cancelar esta marcação? Esta ação não pode ser desfeita.</div>';
+          html += '<div class="actions">';
+          html += '<button class="btn btn-reject btn-sm" data-action="cancel-booking" data-id="'+b.id+'">Sim, cancelar</button>';
+          html += '<button class="btn btn-ghost btn-sm" data-action="dismiss-cancel">Voltar atrás</button>';
+          html += '</div>';
+        } else {
+          html += '<div class="actions">';
+          html += '<button class="btn btn-ghost btn-sm" data-action="start-edit" data-id="'+b.id+'">Alterar horário</button>';
+          html += '<button class="btn btn-reject btn-sm" data-action="request-cancel" data-id="'+b.id+'">Cancelar marcação</button>';
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+    });
+  }
+  html += '</div>';
+
+  if(blocked.length){
+    html += '<div class="card">';
+    html += '<div class="section-title">Horários bloqueados manualmente ('+blocked.length+')</div>';
+    blocked.slice(0,50).forEach(b=>{
+      html += '<div class="blockeddate-row"><span>'+fmtDateLong(b.date)+' · '+b.time+'</span><button class="rm" data-action="toggle-block" data-date="'+b.date+'" data-time="'+b.time+'">Desbloquear</button></div>';
+    });
+    if(blocked.length>50) html += '<div class="empty-note">+ '+(blocked.length-50)+' outros…</div>';
+    html += '</div>';
+  }
+
+  html += '<div class="card">';
+  html += '<div class="section-title">Bloquear um horário ou período</div>';
+  html += '<p style="color:#5C5346;font-size:14px;margin:0 0 10px;">Escolhe o dia (ou período de dias) e a hora de início e fim a bloquear — útil para pausas, almoços ou parte de um dia.</p>';
+  html += '<div class="grid2">';
+  html += '<div><label>De</label><input type="date" id="block-start" value="'+esc(blockRangeStart)+'"></div>';
+  html += '<div><label>Até (opcional)</label><input type="date" id="block-end" value="'+esc(blockRangeEnd)+'"></div>';
+  html += '</div>';
+  html += '<div class="grid2">';
+  html += '<div><label>Hora de início</label><input type="time" id="block-time-from" value="'+esc(blockTimeFrom)+'"></div>';
+  html += '<div><label>Hora de fim</label><input type="time" id="block-time-to" value="'+esc(blockTimeTo)+'"></div>';
+  html += '</div>';
+  html += '<div style="margin-top:12px;"><button class="btn btn-primary" data-action="add-timeblock">Bloquear</button></div>';
+  html += '</div>';
+
+  html += '<div class="card">';
+  html += '<div class="section-title">Férias / dias sem trabalhar</div>';
+  html += '<p style="color:#5C5346;font-size:14px;margin:0 0 10px;">Bloqueia um dia ou um período inteiro — esses dias deixam de aparecer para marcação.</p>';
+  html += '<div class="grid2">';
+  html += '<div><label>De</label><input type="date" id="vac-start" value="'+esc(vacStart)+'"></div>';
+  html += '<div><label>Até (opcional)</label><input type="date" id="vac-end" value="'+esc(vacEnd)+'"></div>';
+  html += '</div>';
+  html += '<div style="margin-top:12px;"><button class="btn btn-primary" data-action="add-vacation">Bloquear período</button></div>';
+  if(data.blockedDates.length){
+    html += '<div style="margin-top:16px;">';
+    data.blockedDates.forEach(k=>{
+      html += '<div class="blockeddate-row"><span>'+fmtDateLong(k)+'</span><button class="rm" data-action="remove-vacation" data-date="'+k+'">Desbloquear</button></div>';
+    });
+    html += '</div>';
+  } else {
+    html += '<div class="empty-note">Sem dias bloqueados de momento.</div>';
+  }
+  html += '</div>';
+
+  html += '<div class="card">';
+  html += '<button class="link-btn" data-action="toggle-config">'+(showConfig?'Fechar definições':'Definições da barbearia')+'</button>';
+  if(showConfig) html += renderConfigForm();
+  html += '</div>';
+
+  return html;
+}
+
+function renderRescheduleCard(b){
+  const dates = generateWorkDates(21);
+  if(!dates.includes(b.date)) dates.unshift(b.date);
+  const activeDate = editDate || b.date;
+  let html = '<div class="req" style="border-color:var(--brass);">';
+  html += '<div class="top"><span class="who">'+esc(b.name)+'</span><span class="when">Atual: '+fmtDateLong(b.date)+' · '+b.time+'</span></div>';
+  html += '<div class="meta">'+esc(b.serviceName||'')+' · '+formatDuration(b.duration)+'</div>';
+  html += '<div style="margin-top:12px;"><div class="section-title">Novo dia</div><div class="daylist">';
+  dates.forEach(dk=>{
+    const [y,m,d] = dk.split('-').map(Number);
+    const dt = new Date(y,m-1,d);
+    const sel = dk===activeDate;
+    html += '<div class="daychip '+(sel?'selected':'')+'" data-action="pick-editdate" data-id="'+b.id+'" data-date="'+dk+'">'+
+      '<div class="dow">'+DOW[dt.getDay()]+'</div><div class="dnum">'+d+'</div></div>';
+  });
+  html += '</div></div>';
+
+  const slots = generateSlots(activeDate, b.duration, b.id);
+  html += '<div style="margin-top:12px;"><div class="section-title">Novo horário</div>';
+  if(slots.length===0){
+    html += '<div class="empty-note">Sem horários livres nesse dia para esta duração.</div>';
+  } else {
+    html += '<div class="slotgrid">';
+    slots.forEach(s=>{
+      html += '<div class="slot '+(s===editTime?'selected':'')+'" data-action="pick-edittime" data-id="'+b.id+'" data-time="'+s+'">'+s+'</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  html += '<div class="actions" style="margin-top:14px;">';
+  html += '<button class="btn btn-confirm btn-sm" data-action="save-edit" '+(editTime?'':'disabled')+'>Guardar novo horário</button>';
+  html += '<button class="btn btn-ghost btn-sm" data-action="cancel-edit">Cancelar edição</button>';
+  html += '</div></div>';
+  return html;
+}
+
+function renderConfigForm(){
+  const cfg = data.config;
+  let html = '<div style="margin-top:12px;">';
+  html += '<label>Nome da barbearia</label><input type="text" id="c-name" value="'+esc(cfg.barbershopName)+'">';
+  html += '<label>Morada (opcional)</label><input type="text" id="c-address" value="'+esc(cfg.address)+'">';
+  html += '<label>Telefone (opcional)</label><input type="text" id="c-phone" value="'+esc(cfg.phone)+'">';
+  html += '<label>Instagram (link do perfil)</label><input type="text" id="c-insta" value="'+esc(cfg.instagramUrl||'')+'" placeholder="https://www.instagram.com/...">';
+  html += '<label>O teu email (para receberes os pedidos novos)</label><input type="text" id="c-barber-email" value="'+esc(cfg.barberEmail||'')+'" placeholder="teu@email.com">';
+  html += '<div class="grid2">';
+  html += '<div><label>Abertura</label><input type="number" id="c-start" min="0" max="23" value="'+cfg.startHour+'"></div>';
+  html += '<div><label>Fecho</label><input type="number" id="c-end" min="0" max="23" value="'+cfg.endHour+'"></div>';
+  html += '</div>';
+  html += '<div class="grid2">';
+  html += '<div><label>Intervalo entre horários (min)</label><input type="number" id="c-step" min="5" max="60" step="5" value="'+cfg.slotStepMinutes+'"></div>';
+  html += '<div><label>Antecedência mínima (min)</label><input type="number" id="c-lead" min="0" max="1440" step="15" value="'+cfg.leadMinutes+'"></div>';
+  html += '</div>';
+  html += '<label>Dias de funcionamento</label><div class="daysel">';
+  DOW.forEach((d,i)=>{
+    const on = cfg.workDays.includes(i);
+    html += '<div class="daytoggle '+(on?'on':'')+'" data-action="toggle-day" data-day="'+i+'">'+d+'</div>';
+  });
+  html += '</div>';
+
+  html += '<label>Localização por dia</label>';
+  html += '<p style="color:#6E6455;font-size:13px;margin:-4px 0 8px;">Deixa em branco os dias sem local fixo.</p>';
+  const locs = cfg.locationsByDay || {};
+  [...cfg.workDays].sort((a,b)=>a-b).forEach(day=>{
+    html += '<div class="svcrow" data-loc-day="'+day+'">';
+    html += '<span style="flex:0 0 70px;font-weight:600;color:var(--ink);">'+DOW[day]+'</span>';
+    html += '<input type="text" class="loc-input" placeholder="Ex: Leiria" value="'+esc(locs[day]||'')+'">';
+    html += '</div>';
+  });
+
+  html += '<label>Serviços e durações</label><div id="svc-list">';
+  cfg.services.forEach((s,i)=>{
+    html += '<div class="svcrow" data-svc-index="'+i+'">';
+    html += '<input type="text" class="svc-name" value="'+esc(s.name)+'" placeholder="Nome do serviço">';
+    html += '<input type="number" class="svc-min" min="5" max="240" step="5" value="'+s.minutes+'">';
+    html += '<button type="button" class="rm" data-action="remove-service" data-index="'+i+'">Remover</button>';
+    html += '</div>';
+  });
+  html += '</div>';
+  html += '<button type="button" class="link-btn add-svc" data-action="add-service">+ adicionar serviço</button>';
+
+  html += '<label>Código de acesso do barbeiro</label><input type="text" id="c-pass" value="'+esc(cfg.passcode)+'">';
+  html += '<div style="margin-top:16px;"><button class="btn btn-primary" data-action="save-config">Guardar definições</button></div>';
+  html += '</div>';
+  return html;
+}
+
+function attachHandlers(){
+  root.querySelectorAll('[data-action]').forEach(el=>{
+    el.addEventListener('click', onAction);
+  });
+  const pi = document.getElementById('pass-input');
+  if(pi){ pi.addEventListener('input', ()=>{ passInput = pi.value; }); }
+  const vs = document.getElementById('vac-start');
+  if(vs){ vs.addEventListener('input', ()=>{ vacStart = vs.value; }); }
+  const ve = document.getElementById('vac-end');
+  if(ve){ ve.addEventListener('input', ()=>{ vacEnd = ve.value; }); }
+  const bs = document.getElementById('block-start');
+  if(bs){ bs.addEventListener('input', ()=>{ blockRangeStart = bs.value; }); }
+  const be = document.getElementById('block-end');
+  if(be){ be.addEventListener('input', ()=>{ blockRangeEnd = be.value; }); }
+  const btf = document.getElementById('block-time-from');
+  if(btf){ btf.addEventListener('input', ()=>{ blockTimeFrom = btf.value; }); }
+  const btt = document.getElementById('block-time-to');
+  if(btt){ btt.addEventListener('input', ()=>{ blockTimeTo = btt.value; }); }
+}
+
+function readServicesFromForm(){
+  const rows = root.querySelectorAll('#svc-list .svcrow');
+  const services = [];
+  rows.forEach(row=>{
+    const name = row.querySelector('.svc-name').value.trim();
+    const minutes = Number(row.querySelector('.svc-min').value);
+    if(name && minutes>0){
+      const existingIdx = Number(row.dataset.svcIndex);
+      const existingId = data.config.services[existingIdx] ? data.config.services[existingIdx].id : null;
+      services.push({id: existingId || ('svc_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)), name, minutes});
+    }
+  });
+  return services;
+}
+
+function onAction(e){
+  const el = e.currentTarget;
+  const action = el.dataset.action;
+
+  if(action==='unlock'){
+    if(passInput === data.config.passcode){ barberUnlocked = true; passError=false; }
+    else { passError = true; }
+    render(); return;
+  }
+  if(action==='decide'){ decideBooking(el.dataset.id, el.dataset.decision); return; }
+  if(action==='request-cancel'){ requestCancelBooking(el.dataset.id); return; }
+  if(action==='dismiss-cancel'){ dismissCancelBooking(); return; }
+  if(action==='cancel-booking'){ cancelBooking(el.dataset.id); return; }
+  if(action==='start-edit'){ startEditBooking(el.dataset.id); return; }
+  if(action==='cancel-edit'){ cancelEditBooking(); return; }
+  if(action==='pick-editdate'){ editDate = el.dataset.date; editTime = null; render(); return; }
+  if(action==='pick-edittime'){ editTime = el.dataset.time; render(); return; }
+  if(action==='save-edit'){ saveEditBooking(); return; }
+  if(action==='copy-email'){
+    const text = 'Para: '+lastEmail.to+'\nAssunto: '+lastEmail.subject+'\n\n'+lastEmail.body;
+    copyText(text);
+    return;
+  }
+  if(action==='reopen-email'){ openMail(lastEmail.to, lastEmail.subject, lastEmail.body); return; }
+  if(action==='close-email'){ lastEmail = null; render(); return; }
+  if(action==='close-notify'){ uiMessage = null; render(); return; }
+  if(action==='toggle-block'){ toggleBlock(el.dataset.date, el.dataset.time); return; }
+  if(action==='add-vacation'){ addVacationBlock(); return; }
+  if(action==='add-timeblock'){ addTimeRangeBlock(); return; }
+  if(action==='remove-vacation'){ removeBlockedDate(el.dataset.date); return; }
+  if(action==='toggle-config'){ showConfig = !showConfig; render(); return; }
+  if(action==='toggle-day'){
+    const day = Number(el.dataset.day);
+    const idx = data.config.workDays.indexOf(day);
+    if(idx>=0) data.config.workDays.splice(idx,1); else data.config.workDays.push(day);
+    render(); return;
+  }
+  if(action==='add-service'){
+    const services = readServicesFromForm();
+    services.push({id:'svc_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), name:'', minutes:30});
+    data.config.services = services;
+    render(); return;
+  }
+  if(action==='remove-service'){
+    const services = readServicesFromForm();
+    const idx = Number(el.dataset.index);
+    services.splice(idx,1);
+    if(services.length===0) services.push({...DEFAULT_SERVICES[0]});
+    data.config.services = services;
+    render(); return;
+  }
+  if(action==='save-config'){
+    const services = readServicesFromForm();
+    const locationsByDay = {};
+    root.querySelectorAll('[data-loc-day]').forEach(row=>{
+      const day = row.dataset.locDay;
+      const val = row.querySelector('.loc-input').value.trim();
+      if(val) locationsByDay[day] = val;
+    });
+    const newCfg = {
+      ...data.config,
+      barbershopName: document.getElementById('c-name').value.trim() || 'Barbearia',
+      address: document.getElementById('c-address').value.trim(),
+      phone: document.getElementById('c-phone').value.trim(),
+      instagramUrl: document.getElementById('c-insta').value.trim(),
+      barberEmail: document.getElementById('c-barber-email').value.trim(),
+      startHour: Number(document.getElementById('c-start').value),
+      endHour: Number(document.getElementById('c-end').value),
+      slotStepMinutes: Number(document.getElementById('c-step').value),
+      leadMinutes: Number(document.getElementById('c-lead').value),
+      passcode: document.getElementById('c-pass').value.trim() || '1234',
+      services: services.length ? services : DEFAULT_SERVICES,
+      locationsByDay: locationsByDay
+    };
+    saveConfig(newCfg);
+    return;
+  }
+}
+
+function initEmailJs(){
+  try{
+    if(typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY.indexOf('COLA_AQUI')===-1){
+      emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+      emailjsReady = true;
+    }
+  }catch(e){
+    console.error('EmailJS init failed', e);
+    emailjsReady = false;
+  }
+}
+
+initEmailJs();
+initFirebase();
+</script>
+</body>
+</html>
