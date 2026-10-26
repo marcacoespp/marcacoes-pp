@@ -235,6 +235,7 @@ let closeExtras = [];        // [{serviceName, price}] sem marcação
 let closeEditing = false;    // a editar um fecho já feito
 let closeInit = '';          // data para a qual closeRows foi inicializado
 let showClosing = false;
+let showPast = false;
 let repPreset = 'month';   // today | week | last7 | month | lastmonth | custom
 let repFrom = '';
 let cmpMetric = 'total';   // total | count
@@ -963,7 +964,9 @@ function renderBarberView(){
   }
 
   const pending = data.bookings.filter(b=>b.status==='pending').sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
-  const confirmed = data.bookings.filter(b=>b.status==='confirmed').sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
+  const _today = todayKey();
+  const confirmed = data.bookings.filter(b=>b.status==='confirmed' && b.date>=_today).sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
+  const pastConfirmed = data.bookings.filter(b=>b.status==='confirmed' && b.date<_today).sort((a,b)=> (b.date+b.time).localeCompare(a.date+a.time));
   const blocked = data.bookings.filter(b=>b.status==='blocked').sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
 
   let html = '';
@@ -1064,6 +1067,16 @@ function renderBarberView(){
     });
   }
   html += '</div>';
+
+  if(pastConfirmed.length){
+    html += '<div class="card"><button class="link-btn" data-action="toggle-past">'+(showPast?'Esconder':'Ver')+' marcações passadas ('+pastConfirmed.length+')</button>';
+    if(showPast){
+      pastConfirmed.slice(0,60).forEach(b=>{
+        html += '<div class="blockeddate-row"><span>'+fmtDateLong(b.date)+' · '+b.time+' · '+esc(b.name)+' · '+esc(b.serviceName||'')+'</span></div>';
+      });
+    }
+    html += '</div>';
+  }
 
   html += renderClosing();
 
@@ -1278,6 +1291,7 @@ function onAction(e){
   }
   if(action==='accept-change'){ acceptChange(el.dataset.id); return; }
   if(action==='decline-change'){ declineChange(el.dataset.id); return; }
+  if(action==='toggle-past'){ showPast = !showPast; render(); return; }
   if(action==='toggle-closing'){ showClosing = !showClosing; if(showClosing){ closeInit=''; } render(); return; }
   if(action==='close-save'){ saveClosing(); return; }
   if(action==='close-edit'){ closeEditing = true; closeInit=''; render(); return; }
