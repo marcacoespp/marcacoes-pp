@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PP Marcações — Painel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Alfa+Slab+One&family=UnifrakturCook:wght@700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <!-- Firebase (base de dados gratuita e partilhada) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -13,142 +13,138 @@
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   :root{
-    --ink:#241E18;
-    --green:#A81717;
-    --green-dark:#26201A;
-    --oxblood:#7A2323;
-    --brass:#9C7420;
-    --parchment:#D9D2C4;
-    --sage:#C7BDAB;
-    --card:#F1ECE0;
-    --line:#B7AC98;
-    --danger:#B23324;
-    --confirm:#2E6B3F;
-    --radius:10px;
+    --bg:#0E1116; --bg2:#12161D; --card:#151A22; --line:#252C39; --line2:#2F3745;
+    --ink:#F1F3F7; --muted:#8A93A3; --accent:#2F5BD3; --accent2:#4A74EE;
+    --danger:#E5484D; --confirm:#1F9D6B; --brass:#4A74EE; --oxblood:#6C93FF; --sage:#222B3D; --green-dark:#F1F3F7; --green:#2F5BD3;
+    --radius:12px; color-scheme:dark;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
-  body{
-    background:var(--parchment);
-    color:var(--ink);
-    font-family:'Work Sans',sans-serif;
-    font-size:16px;
-    line-height:1.5;
-    -webkit-font-smoothing:antialiased;
-  }
-  h1,h2,h3{
-    font-family:'Bebas Neue',sans-serif;
-    font-weight:400;
-    letter-spacing:.03em;
-    margin:0;
-    color:var(--green-dark);
-  }
-  .app{max-width:640px;margin:0 auto;padding:0 20px 60px;}
-  .header{padding:28px 0 0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Archivo Black',sans-serif;font-weight:900;text-transform:uppercase;margin:0;color:var(--ink);}
+  .app{max-width:760px;margin:0 auto;padding:0 20px 60px;}
+  .header{padding:30px 0 0;}
   .brandrow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-  .brand{
-    font-family:'UnifrakturCook',serif;font-weight:700;font-size:34px;
-    color:var(--green-dark);letter-spacing:.5px;
-    text-shadow:1px 1px 0 rgba(0,0,0,.12);
-  }
-  .tagline{font-size:14px;color:#5C5346;margin-top:4px;}
-  .stripe{
-    height:6px;margin:18px 0 22px;border-radius:2px;
-    background:repeating-linear-gradient(
-      -45deg,
-      var(--green) 0px, var(--green) 10px,
-      #000 10px, #000 20px,
-      var(--brass) 20px, var(--brass) 24px,
-      #000 24px, #000 28px
-    );
-  }
-  .card{
-    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-    padding:20px;margin-bottom:16px;
-  }
-  .section-title{font-size:13px;font-weight:600;color:#6E6455;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+  .brand{font-family:'Archivo Black',sans-serif;font-size:30px;text-transform:uppercase;color:#fff;letter-spacing:.01em;line-height:1;}
+  .brand span{color:var(--accent);}
+  .tagline{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-top:8px;}
+  .stripe{height:1px;margin:22px 0 26px;background:var(--line);}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:16px;}
+  .section-title{font-family:'Archivo Black',sans-serif;font-size:15px;color:var(--ink);text-transform:uppercase;letter-spacing:.04em;margin-bottom:14px;}
 
-  .daylist{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;}
-  .daychip{
-    flex:0 0 auto;border:1px solid var(--line);background:var(--card);
-    border-radius:10px;padding:10px 14px;cursor:pointer;text-align:center;min-width:64px;
-    transition:background .15s ease,border-color .15s ease;
-  }
-  .daychip .dow{font-size:11.5px;color:#6E6455;text-transform:uppercase;letter-spacing:.04em;}
-  .daychip .dnum{font-family:'Bebas Neue',sans-serif;font-size:19px;font-weight:600;margin-top:2px;}
-  .daychip.selected{background:var(--green);border-color:var(--green);}
-  .daychip.selected .dow, .daychip.selected .dnum{color:#fff;}
+  .daylist{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#2F3745 transparent;}
+  .daychip{flex:0 0 auto;border:1.5px solid var(--line2);background:var(--bg2);border-radius:10px;padding:10px 14px;cursor:pointer;text-align:center;min-width:64px;}
+  .daychip .dow{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+  .daychip .dnum{font-family:'Archivo Black',sans-serif;font-size:20px;margin-top:2px;}
+  .daychip:hover{border-color:var(--accent2);}
+  .daychip.selected{background:var(--accent);border-color:var(--accent);}
+  .daychip.selected .dow{color:#DCE5FF;}
 
   .slotgrid{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
-  .slot{
-    border:1px solid var(--line);background:var(--card);border-radius:8px;
-    padding:9px 14px;font-size:14.5px;cursor:pointer;font-weight:500;
-    transition:background .15s ease,border-color .15s ease,color .15s ease;
-  }
-  .slot:hover{border-color:var(--brass);}
-  .slot.selected{background:var(--brass);border-color:var(--brass);color:#fff;}
-  .empty-note{color:#6E6455;font-size:14.5px;padding:6px 0;}
+  .slot{border:1.5px solid var(--line2);background:var(--bg2);border-radius:8px;padding:9px 14px;font-size:14.5px;cursor:pointer;font-weight:600;}
+  .slot:hover{border-color:var(--accent2);}
+  .slot.selected{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .empty-note{color:var(--muted);font-size:14.5px;padding:6px 0;}
 
-  label{display:block;font-size:13.5px;font-weight:600;color:var(--green-dark);margin:14px 0 6px;}
+  label{display:block;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#AEB7C6;margin:16px 0 7px;}
   label:first-child{margin-top:0;}
-  input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],textarea,input[type=number]{
-    width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;
-    font-family:'Work Sans',sans-serif;font-size:15px;color:var(--ink);background:#FBF7EC;
-  }
-  input:focus,textarea:focus{outline:2px solid var(--brass);outline-offset:1px;border-color:var(--brass);}
+  input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],textarea,input[type=number],select{
+    width:100%;border:1.5px solid var(--line2);border-radius:8px;padding:11px 13px;font-family:'Inter',sans-serif;font-size:15px;color:var(--ink);background:var(--bg);}
+  input:focus,textarea:focus,select:focus{outline:2px solid var(--accent2);outline-offset:1px;border-color:var(--accent2);}
   textarea{resize:vertical;min-height:60px;}
+  input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px;}
 
-  .btn{
-    display:inline-flex;align-items:center;justify-content:center;gap:8px;
-    border:none;border-radius:8px;padding:12px 20px;font-family:'Work Sans',sans-serif;
-    font-size:15px;font-weight:600;cursor:pointer;transition:filter .15s ease, transform .05s ease;
-  }
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid transparent;border-radius:8px;padding:13px 22px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .15s,filter .15s,transform .05s;}
   .btn:active{transform:translateY(1px);}
-  .btn-primary{background:var(--green);color:#fff;}
-  .btn-primary:hover{filter:brightness(1.08);}
-  .btn-primary:disabled{background:#B9C2B2;cursor:not-allowed;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:var(--accent2);}
+  .btn-primary:disabled,.btn-confirm:disabled{background:#2A3350;color:#7A86A5;cursor:not-allowed;}
   .btn-confirm{background:var(--confirm);color:#fff;}
-  .btn-reject{background:var(--danger);color:#fff;}
-  .btn-ghost{background:transparent;color:var(--green-dark);border:1px solid var(--line);}
-  .btn-sm{padding:8px 14px;font-size:13.5px;}
+  .btn-reject{background:transparent;border-color:var(--danger);color:#FF8A8E;}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line2);}
+  .btn-ghost:hover{border-color:#fff;}
+  .btn-sm{padding:9px 14px;font-size:12px;}
 
-  .req{border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:10px;background:#FBF7EC;}
+  .req{border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:12px;background:var(--bg2);}
   .req .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;}
-  .req .who{font-weight:600;color:var(--green-dark);}
-  .req .when{font-family:'Bebas Neue',sans-serif;font-weight:600;color:var(--oxblood);}
-  .req .meta{font-size:13.5px;color:#5C5346;margin-top:4px;}
-  .req .note{font-size:13.5px;color:#5C5346;margin-top:6px;font-style:italic;}
-  .req .actions{display:flex;gap:8px;margin-top:12px;}
+  .req .who{font-weight:700;color:var(--ink);}
+  .req .when{font-weight:700;color:var(--accent2);}
+  .req .meta{font-size:13.5px;color:var(--muted);margin-top:4px;}
+  .req .note{font-size:13.5px;color:#6B5D4C;margin-top:6px;font-style:italic;}
+  .req .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
 
-  .pill{font-size:11.5px;padding:2px 8px;border-radius:20px;font-weight:600;}
-  .pill.blocked{background:var(--sage);color:var(--green-dark);}
+  .pill{font-size:11.5px;padding:2px 8px;border-radius:20px;font-weight:700;}
+  .pill.blocked{background:var(--sage);color:var(--ink);}
 
   .passgate{text-align:center;padding:20px 0;}
   .passgate input{max-width:180px;margin:14px auto;text-align:center;letter-spacing:3px;font-size:18px;}
-  .error-text{color:var(--danger);font-size:13.5px;margin-top:6px;}
+  .error-text{color:#FF8A8E;font-size:13.5px;margin-top:6px;}
 
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   @media (max-width:480px){.grid2{grid-template-columns:1fr;}}
 
-  .footer-note{color:#6E6455;font-size:12.5px;text-align:center;margin-top:30px;}
+  .footer-note{color:#5D6678;font-size:12.5px;text-align:center;margin-top:30px;}
   .daysel{display:flex;gap:6px;flex-wrap:wrap;}
-  .daytoggle{
-    border:1px solid var(--line);background:#FBF7EC;border-radius:6px;padding:6px 10px;
-    font-size:13px;cursor:pointer;font-weight:600;color:#5C5346;
-  }
-  .daytoggle.on{background:var(--green);border-color:var(--green);color:#fff;}
-  .link-btn{background:none;border:none;color:var(--oxblood);font-size:13.5px;cursor:pointer;padding:0;text-decoration:underline;}
-  .loading{color:#6E6455;font-size:14.5px;padding:20px 0;text-align:center;}
+  .daytoggle{border:1.5px solid var(--line2);background:var(--bg2);border-radius:6px;padding:7px 11px;font-size:13px;cursor:pointer;font-weight:700;color:#AEB7C6;}
+  .daytoggle.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .link-btn{background:none;border:none;color:var(--oxblood);font-size:13.5px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;}
+  .loading{color:var(--muted);font-size:14.5px;padding:40px 0;text-align:center;}
 
   .svcrow{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
   .svcrow input[type=text]{flex:2;}
   .svcrow input[type=number]{flex:1;}
-  .svcrow .rm{background:none;border:none;color:var(--danger);font-size:13px;cursor:pointer;font-weight:600;white-space:nowrap;}
-  .add-svc{color:var(--green-dark);}
+  .svcrow .rm{background:none;border:none;color:#FF8A8E;font-size:13px;cursor:pointer;font-weight:700;white-space:nowrap;}
+  .add-svc{color:var(--oxblood);}
 
-  .blockeddate-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px;}
+  .blockeddate-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;}
   .blockeddate-row:last-child{border-bottom:none;}
-  .blockeddate-row .rm{background:none;border:none;color:var(--danger);font-size:13px;cursor:pointer;font-weight:600;}
+  .blockeddate-row .rm{background:none;border:none;color:#FF8A8E;font-size:13px;cursor:pointer;font-weight:700;}
+
+  /* ============ TEMA A — FLASH CLÁSSICO (claro) ============ */
+  :root{
+    --bg:#F0E4CB; --bg2:#FBF4E3; --card:#FBF4E3; --line:#1D1510; --line2:#1D1510;
+    --ink:#1D1510; --muted:#6B5D4C; --accent:#D2382B; --accent2:#1F7A74;
+    --danger:#B3261E; --confirm:#1F7A74; --brass:#E8A92A; --oxblood:#1F7A74; --sage:#E8A92A; --green-dark:#1D1510; --green:#D2382B;
+    --mus:#E8A92A; --teal:#1F7A74; --red:#D2382B; color-scheme:light;
+  }
+  body{background:var(--bg) radial-gradient(rgba(29,21,16,.07) 1px,transparent 1.2px) 0 0/14px 14px;color:var(--ink);}
+  h1,h2,h3{font-family:'Alfa Slab One',serif;font-weight:400;}
+  .brand{font-family:'Alfa Slab One',serif;font-size:36px;color:var(--red);-webkit-text-stroke:1.5px var(--ink);text-shadow:3px 3px 0 var(--ink);}
+  .brand span{color:var(--ink);-webkit-text-stroke:0;text-shadow:none;font-family:'UnifrakturCook',serif;font-weight:700;text-transform:none;font-size:1.05em;}
+  .tagline{color:var(--teal);font-weight:800;}
+  .stripe{height:6px;background:repeating-linear-gradient(90deg,var(--ink) 0 14px,transparent 14px 22px);}
+  .card{border:3px solid var(--ink);border-radius:8px;box-shadow:6px 6px 0 var(--ink);}
+  .section-title{display:inline-block;font-family:'Alfa Slab One',serif;font-size:15px;letter-spacing:.06em;background:var(--mus);border:3px solid var(--ink);padding:6px 16px;box-shadow:3px 3px 0 var(--ink);margin-bottom:18px;}
+  .daychip,.slot,.daytoggle{background:var(--card);border:2px solid var(--ink);box-shadow:2px 2px 0 var(--ink);color:var(--ink);}
+  .daychip:hover,.slot:hover{border-color:var(--ink);background:var(--mus);}
+  .daychip.selected,.slot.selected,.daytoggle.on{background:var(--red);border-color:var(--ink);color:var(--card);}
+  .daychip.selected .dow{color:#FBE3DE;}
+  .daylist,.dayrow{scrollbar-color:var(--ink) transparent;}
+  label{color:var(--ink);}
+  input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],textarea,input[type=number],select{background:#fff;border:2px solid var(--ink);color:var(--ink);}
+  input:focus,textarea:focus,select:focus{outline:3px solid var(--mus);border-color:var(--ink);}
+  input[type=checkbox]{accent-color:var(--red);}
+  .btn{border:3px solid var(--ink);border-radius:6px;box-shadow:3px 3px 0 var(--ink);font-weight:800;transition:transform .08s,box-shadow .08s;}
+  .btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink);}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink);}
+  .btn-primary{background:var(--red);color:var(--card);}
+  .btn-primary:hover{background:var(--red);}
+  .btn-primary:disabled,.btn-confirm:disabled{background:#D9CDB3;color:#8C7F6A;box-shadow:none;transform:none;}
+  .btn-confirm{background:var(--teal);color:var(--card);}
+  .btn-reject{background:var(--card);border-color:var(--ink);color:var(--danger);}
+  .btn-ghost{background:var(--mus);color:var(--ink);border-color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--ink);}
+  .req{background:#fff;border:2px solid var(--ink);border-radius:8px;box-shadow:3px 3px 0 var(--ink);}
+  .req .when{color:var(--red);}
+  .req .meta{color:var(--muted);} .req .note{color:var(--muted);}
+  .pill.blocked{background:var(--mus);color:var(--ink);border:2px solid var(--ink);}
+  .error-text{color:var(--danger);font-weight:600;}
+  .link-btn{color:var(--teal);}
+  .footer-note{color:var(--muted);}
+  .blockeddate-row{border-bottom:2px dashed rgba(29,21,16,.3);}
+  .svcrow .rm,.blockeddate-row .rm{color:var(--danger);}
+  .add-svc{color:var(--teal);}
+  ::placeholder{color:#A09480;}
 </style>
 </head>
 <body>
@@ -159,10 +155,13 @@ const DOW = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const MONTHS = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 
 const DEFAULT_SERVICES = [
-  {id:'corte', name:'Cabelo', minutes:50},
-  {id:'corte_barba', name:'Cabelo + Barba', minutes:70},
-  {id:'barba', name:'Barba', minutes:25}
+  {id:'corte', name:'Cabelo', minutes:50, price:15},
+  {id:'corte_barba', name:'Cabelo + Barba', minutes:70, price:20},
+  {id:'barba', name:'Barba', minutes:25, price:8}
 ];
+
+const DEFAULT_PRICES = {corte:15, corte_barba:20, barba:8};
+function withDefaultPrices(list){ return (list||[]).map(function(s){ var p=Number(s.price)||0; return p>0 ? s : Object.assign({}, s, {price: DEFAULT_PRICES[s.id]||0}); }); }
 
 const DEFAULT_CONFIG = {
   barbershopName: 'PP Marcações',
@@ -228,6 +227,21 @@ let editingBookingId = null;
 let editDate = null;
 let editTime = null;
 
+// fecho do dia
+let fechos = [];            // documentos barbearia_fechos
+let closeDate = '';          // YYYY-MM-DD (por omissão hoje)
+let closeRows = {};          // bookingId -> {attended, price}
+let closeExtras = [];        // [{serviceName, price}] sem marcação
+let closeEditing = false;    // a editar um fecho já feito
+let closeInit = '';          // data para a qual closeRows foi inicializado
+let showClosing = false;
+let repPreset = 'month';   // today | week | last7 | month | lastmonth | custom
+let repFrom = '';
+let cmpMetric = 'total';   // total | count
+let cmpMonths = 6;         // 6 | 12
+let repTo = '';
+let fechosRef = null;
+
 const root = document.getElementById('root');
 
 function pad(n){return n<10?'0'+n:''+n;}
@@ -246,6 +260,20 @@ function formatDuration(mins){
   return mins+' min';
 }
 function minutesFromTime(t){const [h,m]=t.split(':').map(Number); return h*60+m;}
+function money(n){ return '€'+(Number(n)||0).toFixed(2).replace('.',','); }
+function newToken(){
+  const a = new Uint8Array(12);
+  (window.crypto||window.msCrypto).getRandomValues(a);
+  return Array.from(a).map(x=>x.toString(36).padStart(2,'0')).join('').slice(0,20);
+}
+function clientSiteBase(){ return new URL('./', location.href).href; }
+function manageUrlFor(token){ return clientSiteBase() + 'index.html?m=' + token; }
+async function ensureToken(b){
+  if(b.token) return b.token;
+  const t = newToken();
+  try{ await bookingsRef.doc(b.id).update({token:t}); b.token = t; }catch(e){ console.error('token failed', e); return ''; }
+  return t;
+}
 function esc(s){return (s||'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));}
 function overlaps(aStart,aDur,bStart,bDur){ return aStart < bStart+bDur && bStart < aStart+aDur; }
 
@@ -267,6 +295,7 @@ function initFirebase(){
     if(snap.exists){
       data.config = {...DEFAULT_CONFIG, ...snap.data()};
       if(!data.config.services || !data.config.services.length) data.config.services = DEFAULT_SERVICES;
+      data.config.services = withDefaultPrices(data.config.services);
       if(!data.config.slotStepMinutes) data.config.slotStepMinutes = 15;
       data.blockedDates = data.config.blockedDates || [];
     } else {
@@ -281,6 +310,12 @@ function initFirebase(){
     firebaseUnavailable = true;
     render();
   });
+
+  fechosRef = fsDb.collection('barbearia_fechos');
+  fechosRef.onSnapshot(snap=>{
+    fechos = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    render();
+  }, err=>console.error('fechos listener error', err));
 
   bookingsRef.onSnapshot(snap=>{
     data = data || {config:{...DEFAULT_CONFIG}, bookings:[], blockedDates:[]};
@@ -412,10 +447,12 @@ async function decideBooking(id, decision){
   const when = fmtDateLong(b.date)+' às '+b.time;
   let subject, body;
   if(decision === 'confirmed'){
+    const tk = await ensureToken(b);
     subject = 'Marcação confirmada — '+cfg.barbershopName;
     body = 'Olá '+b.name+',\n\nA tua marcação de '+b.serviceName+' para '+when+' foi confirmada.\n\n'+
       (cfg.address? 'Morada: '+cfg.address+'\n':'')+
       (cfg.phone? 'Telefone: '+cfg.phone+'\n':'')+
+      (tk? '\nPrecisas de cancelar ou mudar o horário? Faz isso aqui:\n'+manageUrlFor(tk)+'\n':'')+
       '\nAté já!\n'+cfg.barbershopName;
   } else {
     subject = 'Marcação não confirmada — '+cfg.barbershopName;
@@ -484,17 +521,19 @@ async function saveEditBooking(){
   const oldWhen = fmtDateLong(b.date)+' às '+b.time;
   const newWhen = fmtDateLong(targetDate)+' às '+editTime;
   try{
-    await bookingsRef.doc(editingBookingId).update({date: targetDate, time: editTime});
+    await bookingsRef.doc(editingBookingId).update({date: targetDate, time: editTime, changeRequest: firebase.firestore.FieldValue.delete()});
   }catch(e){
     console.error('edit save failed', e);
     notify('Não foi possível guardar a alteração. Tenta novamente.');
     return;
   }
   const cfg = data.config;
+  const tk = await ensureToken(b);
   const subject = 'Marcação alterada — '+cfg.barbershopName;
   const body = 'Olá '+b.name+',\n\nA tua marcação de '+b.serviceName+' foi alterada de '+oldWhen+' para '+newWhen+'.\n\n'+
     (cfg.address? 'Morada: '+cfg.address+'\n':'')+
     (cfg.phone? 'Telefone: '+cfg.phone+'\n':'')+
+    (tk? '\nSe não te der jeito, podes pedir outro horário aqui:\n'+manageUrlFor(tk)+'\n':'')+
     '\nAté já!\n'+cfg.barbershopName;
   const sentAuto = await sendClientEmail(b.email, b.name, subject, body);
   lastEmail = {to: b.email, subject, body, sent: sentAuto};
@@ -621,6 +660,274 @@ async function saveConfig(newCfg){
   render();
 }
 
+
+// ---------- pedidos de alteração dos clientes ----------
+async function acceptChange(id){
+  const b = data.bookings.find(x=>x.id===id);
+  if(!b || !b.changeRequest) return;
+  const cr = b.changeRequest;
+  if(!generateSlots(cr.date, b.duration, b.id).includes(cr.time)){
+    notify('Esse horário já não está livre. Recusa o pedido ou combina outro com o cliente.'); return;
+  }
+  try{
+    await bookingsRef.doc(id).update({date: cr.date, time: cr.time, changeRequest: firebase.firestore.FieldValue.delete()});
+  }catch(e){ console.error(e); notify('Não foi possível aceitar. Tenta novamente.'); return; }
+  const cfg = data.config;
+  const tk = await ensureToken(b);
+  const subject = 'Alteração aceite — '+cfg.barbershopName;
+  const body = 'Olá '+b.name+',\n\nAceitámos o teu pedido: a tua marcação de '+b.serviceName+' passou de '+fmtDateLong(b.date)+' às '+b.time+
+    ' para '+fmtDateLong(cr.date)+' às '+cr.time+'.\n\n'+
+    (cfg.address? 'Morada: '+cfg.address+'\n':'')+
+    (tk? '\nPara gerir a marcação: '+manageUrlFor(tk)+'\n':'')+
+    '\nAté já!\n'+cfg.barbershopName;
+  const sentAuto = await sendClientEmail(b.email, b.name, subject, body);
+  lastEmail = {to: b.email, subject, body, sent: sentAuto};
+  render();
+}
+async function declineChange(id){
+  const b = data.bookings.find(x=>x.id===id);
+  if(!b || !b.changeRequest) return;
+  const cr = b.changeRequest;
+  try{
+    await bookingsRef.doc(id).update({changeRequest: firebase.firestore.FieldValue.delete()});
+  }catch(e){ console.error(e); notify('Não foi possível recusar. Tenta novamente.'); return; }
+  const cfg = data.config;
+  const tk = await ensureToken(b);
+  const subject = 'Pedido de alteração não aceite — '+cfg.barbershopName;
+  const body = 'Olá '+b.name+',\n\nNão foi possível mudar a tua marcação para '+fmtDateLong(cr.date)+' às '+cr.time+'.\n'+
+    'A tua marcação mantém-se em '+fmtDateLong(b.date)+' às '+b.time+'.\n'+
+    (cfg.phone? '\nSe precisares, fala connosco: '+cfg.phone+'\n':'')+
+    (tk? '\nPodes pedir outro horário aqui: '+manageUrlFor(tk)+'\n':'')+
+    '\n'+cfg.barbershopName;
+  const sentAuto = await sendClientEmail(b.email, b.name, subject, body);
+  lastEmail = {to: b.email, subject, body, sent: sentAuto};
+  render();
+}
+
+// ---------- fecho do dia ----------
+function todayKey(){ return dateKey(new Date()); }
+function serviceFor(b){
+  return data.config.services.find(s=>s.id===b.serviceId) || data.config.services.find(s=>s.name===b.serviceName) || null;
+}
+function closingFor(date){ return fechos.find(f=>f.id===date) || null; }
+function initCloseRows(date){
+  closeRows = {}; closeExtras = [];
+  const day = data.bookings.filter(b=>b.date===date && b.status==='confirmed');
+  const saved = closingFor(date);
+  day.forEach(b=>{
+    const prev = saved && (saved.items||[]).find(i=>i.bookingId===b.id);
+    const svc = serviceFor(b);
+    closeRows[b.id] = prev ? {attended: prev.attended, price: prev.price} : {attended:true, price: svc ? (svc.price||0) : 0};
+  });
+  if(saved) closeExtras = (saved.items||[]).filter(i=>!i.bookingId).map(i=>({serviceName:i.serviceName, price:i.price}));
+  closeInit = date;
+}
+function closeTotals(date){
+  const day = data.bookings.filter(b=>b.date===date && b.status==='confirmed');
+  let count=0,total=0;
+  day.forEach(b=>{ const r=closeRows[b.id]; if(r && r.attended){ count++; total+=Number(r.price)||0; } });
+  closeExtras.forEach(x=>{ count++; total+=Number(x.price)||0; });
+  return {count,total};
+}
+async function saveClosing(){
+  const date = closeDate || todayKey();
+  const day = data.bookings.filter(b=>b.date===date && b.status==='confirmed').sort((a,b)=>a.time.localeCompare(b.time));
+  const items = [];
+  day.forEach(b=>{
+    const r = closeRows[b.id] || {attended:true, price:0};
+    items.push({bookingId:b.id, name:b.name, serviceName:b.serviceName||'', time:b.time, attended:!!r.attended, price:Number(r.price)||0});
+  });
+  closeExtras.forEach(x=>items.push({bookingId:null, name:'Sem marcação', serviceName:x.serviceName, time:'', attended:true, price:Number(x.price)||0}));
+  const t = closeTotals(date);
+  try{
+    await fechosRef.doc(date).set({date, items, count:t.count, total:t.total, closedAt:Date.now()});
+  }catch(e){ console.error(e); notify('Não foi possível guardar o fecho. Tenta novamente.'); return; }
+  closeEditing = false;
+  notify('Dia fechado: '+t.count+' serviço'+(t.count===1?'':'s')+' · '+money(t.total)+'.');
+}
+
+function repRange(){
+  const now = new Date();
+  const k = d => dateKey(d);
+  if(repPreset==='today'){ return [k(now), k(now)]; }
+  if(repPreset==='week'){
+    const off = (now.getDay()+6)%7;
+    const mon = new Date(now); mon.setDate(now.getDate()-off);
+    const sun = new Date(mon); sun.setDate(mon.getDate()+6);
+    return [k(mon), k(sun)];
+  }
+  if(repPreset==='last7'){ const a = new Date(now); a.setDate(now.getDate()-6); return [k(a), k(now)]; }
+  if(repPreset==='lastmonth'){
+    const a = new Date(now.getFullYear(), now.getMonth()-1, 1), b = new Date(now.getFullYear(), now.getMonth(), 0);
+    return [k(a), k(b)];
+  }
+  if(repPreset==='custom'){ return [repFrom || k(now), repTo || repFrom || k(now)]; }
+  const a = new Date(now.getFullYear(), now.getMonth(), 1), b = new Date(now.getFullYear(), now.getMonth()+1, 0);
+  return [k(a), k(b)];
+}
+
+function renderMonthly(){
+  const now = new Date();
+  const months = [];
+  for(let i=cmpMonths-1;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push({key: d.getFullYear()+'-'+pad(d.getMonth()+1), label: MONTHS[d.getMonth()], year: d.getFullYear(), total:0, count:0});
+  }
+  fechos.forEach(f=>{
+    const m = months.find(x=>x.key===f.id.slice(0,7));
+    if(m){ m.total += f.total||0; m.count += f.count||0; }
+  });
+  const val = m => cmpMetric==='total' ? m.total : m.count;
+  const fmt = v => cmpMetric==='total' ? money(v).replace(',00','') : String(v);
+  const max = Math.max(1, ...months.map(val));
+  const cur = months[months.length-1], prev = months[months.length-2];
+  let h = '<div style="margin-top:22px;border-top:1px solid var(--line);padding-top:18px;">';
+  h += '<div class="section-title">Comparação por mês</div>';
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">';
+  [['total','Faturação'],['count','Nº de serviços']].forEach(p=>{
+    h += '<button class="btn btn-sm '+(cmpMetric===p[0]?'btn-primary':'btn-ghost')+'" data-action="cmp-metric" data-v="'+p[0]+'">'+p[1]+'</button>';
+  });
+  [6,12].forEach(n=>{
+    h += '<button class="btn btn-sm '+(cmpMonths===n?'btn-primary':'btn-ghost')+'" data-action="cmp-months" data-v="'+n+'">'+n+' meses</button>';
+  });
+  h += '</div>';
+  h += '<div style="display:flex;align-items:flex-end;gap:'+(cmpMonths>6?6:12)+'px;height:190px;padding-top:22px;">';
+  months.forEach((m,i)=>{
+    const v = val(m), pct = Math.max(v>0?3:0, Math.round(v/max*100));
+    const isCur = i===months.length-1;
+    h += '<div style="flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;">'+
+      '<div style="font-size:'+(cmpMonths>6?10:12)+'px;font-weight:700;margin-bottom:5px;color:'+(isCur?'var(--ink)':'#6B5D4C')+';white-space:nowrap;">'+(v? fmt(v):'—')+'</div>'+
+      '<div style="width:100%;height:'+pct+'%;background:'+(isCur?'var(--accent)':'#E8A92A')+';border-radius:5px 5px 0 0;min-height:'+(v?3:0)+'px;"></div></div>';
+  });
+  h += '</div>';
+  h += '<div style="display:flex;gap:'+(cmpMonths>6?6:12)+'px;border-top:1px solid var(--line2);padding-top:6px;">';
+  months.forEach((m,i)=>{
+    h += '<div style="flex:1;min-width:0;text-align:center;font-size:'+(cmpMonths>6?10:12)+'px;color:'+(i===months.length-1?'var(--ink)':'var(--muted)')+';text-transform:uppercase;letter-spacing:.04em;">'+m.label+(m.label==='jan'||i===0?'<br><span style="opacity:.6">'+String(m.year).slice(2)+'</span>':'')+'</div>';
+  });
+  h += '</div>';
+  // resumo: mês em curso vs o mesmo período do mês passado (justo, porque o mês em curso está incompleto)
+  const dayNow = now.getDate();
+  let prevPart = 0;
+  fechos.forEach(f=>{
+    if(f.id.slice(0,7)===prev.key && Number(f.id.slice(8,10))<=dayNow){ prevPart += cmpMetric==='total' ? (f.total||0) : (f.count||0); }
+  });
+  const dv = val(cur) - prevPart;
+  if(prevPart>0){
+    const pc = Math.round(dv/prevPart*100);
+    h += '<div style="margin-top:14px;font-size:14.5px;color:#6B5D4C;">Este mês até hoje vs mesmo período do mês passado: <b style="color:'+(dv>=0?'#6FE0B0':'#FF8A8E')+'">'+(dv>=0?'+':'−')+fmt(Math.abs(dv))+' ('+(dv>=0?'+':'−')+Math.abs(pc)+'%)</b></div>';
+  } else {
+    h += '<div style="margin-top:14px;font-size:14px;color:var(--muted);">Ainda não há dados do mês passado para comparar.</div>';
+  }
+  const best = months.reduce((a,b)=>val(b)>val(a)?b:a, months[0]);
+  if(val(best)>0) h += '<div style="margin-top:4px;font-size:14px;color:var(--muted);">Melhor mês: <b style="color:var(--ink)">'+best.label+' '+best.year+'</b> · '+fmt(val(best))+'</div>';
+  h += '<div class="empty-note" style="margin-top:8px;">Só contam os dias fechados. O mês em curso está incompleto.</div>';
+  h += '</div>';
+  return h;
+}
+
+function renderReport(){
+  const [from, to] = repRange();
+  const lo = from <= to ? from : to, hi = from <= to ? to : from;
+  const docs = fechos.filter(f=>f.id>=lo && f.id<=hi).sort((a,b)=>b.id.localeCompare(a.id));
+  const count = docs.reduce((a,f)=>a+(f.count||0),0);
+  const total = docs.reduce((a,f)=>a+(f.total||0),0);
+  const bySvc = {};
+  docs.forEach(f=>(f.items||[]).forEach(i=>{
+    if(!i.attended) return;
+    const n = i.serviceName || 'Outro';
+    bySvc[n] = bySvc[n] || {c:0,t:0};
+    bySvc[n].c++; bySvc[n].t += Number(i.price)||0;
+  }));
+  const presets = [['today','Hoje'],['week','Esta semana'],['last7','Últimos 7 dias'],['month','Este mês'],['lastmonth','Mês passado'],['custom','Período à escolha']];
+  let h = '<div style="margin-top:20px;border-top:1px solid var(--line);padding-top:18px;">';
+  h += '<div class="section-title">Faturação</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">';
+  presets.forEach(p=>{
+    h += '<button class="btn btn-sm '+(repPreset===p[0]?'btn-primary':'btn-ghost')+'" data-action="rep-preset" data-p="'+p[0]+'">'+p[1]+'</button>';
+  });
+  h += '</div>';
+  if(repPreset==='custom'){
+    h += '<div class="grid2"><div><label>De</label><input type="date" id="rep-from" value="'+esc(repFrom||lo)+'"></div><div><label>Até</label><input type="date" id="rep-to" value="'+esc(repTo||hi)+'"></div></div>';
+  }
+  h += '<div style="font-size:13px;color:var(--muted);margin:12px 0 4px;">'+(lo===hi? fmtDateLong(lo) : fmtDateLong(lo)+' → '+fmtDateLong(hi))+'</div>';
+  h += '<div style="font-size:30px;font-weight:800;line-height:1.1;">'+money(total)+'</div>';
+  h += '<div style="font-size:14.5px;color:#6B5D4C;margin-top:4px;">'+count+' serviço'+(count===1?'':'s')+' · '+docs.length+' dia'+(docs.length===1?'':'s')+' fechado'+(docs.length===1?'':'s')+(count? ' · média '+money(total/count)+' por serviço':'')+'</div>';
+  const svcKeys = Object.keys(bySvc);
+  if(svcKeys.length){
+    h += '<div style="margin-top:16px;font-weight:700;font-size:14px;">Por serviço</div>';
+    svcKeys.sort((a,b)=>bySvc[b].t-bySvc[a].t).forEach(n=>{
+      h += '<div class="blockeddate-row"><span>'+esc(n)+' · '+bySvc[n].c+'×</span><span>'+money(bySvc[n].t)+'</span></div>';
+    });
+  }
+  if(docs.length){
+    h += '<div style="margin-top:16px;font-weight:700;font-size:14px;">Por dia</div>';
+    docs.forEach(f=>{
+      h += '<div class="blockeddate-row"><span>'+fmtDateLong(f.id)+'</span><span>'+f.count+' serv. · '+money(f.total)+'</span></div>';
+    });
+  } else {
+    h += '<div class="empty-note" style="margin-top:12px;">Sem dias fechados neste período. Só contam os dias em que carregas em “Fechar o dia”.</div>';
+  }
+  h += renderMonthly();
+  h += '</div>';
+  return h;
+}
+
+function renderClosing(){
+  const date = closeDate || todayKey();
+  if(closeInit !== date) initCloseRows(date);
+  const saved = closingFor(date);
+  const month = date.slice(0,7);
+  const monthDocs = fechos.filter(f=>f.id.slice(0,7)===month);
+  const mCount = monthDocs.reduce((a,f)=>a+(f.count||0),0);
+  const mTotal = monthDocs.reduce((a,f)=>a+(f.total||0),0);
+
+  let html = '<div class="card">';
+  html += '<button class="link-btn" data-action="toggle-closing">'+(showClosing?'Fechar “Fecho do dia”':'Fecho do dia · serviços e faturação')+'</button>';
+  if(!showClosing){ html += '</div>'; return html; }
+
+  html += '<div style="margin-top:12px;"><label>Dia</label><input type="date" id="close-date" value="'+esc(date)+'"></div>';
+
+  if(saved && !closeEditing){
+    html += '<div class="req" style="margin-top:14px;border-color:var(--confirm);">';
+    html += '<div class="top"><span class="who">Dia fechado ✔</span><span class="when">'+fmtDateLong(date)+'</span></div>';
+    html += '<div style="font-size:26px;font-weight:700;margin:6px 0;">'+saved.count+' serviço'+(saved.count===1?'':'s')+' · '+money(saved.total)+'</div>';
+    (saved.items||[]).forEach(i=>{
+      html += '<div class="blockeddate-row"><span>'+(i.time?esc(i.time)+' · ':'')+esc(i.name)+' · '+esc(i.serviceName)+(i.attended?'':' <i>(não veio)</i>')+'</span><span>'+(i.attended?money(i.price):'—')+'</span></div>';
+    });
+    html += '<div class="actions" style="margin-top:10px;"><button class="btn btn-ghost btn-sm" data-action="close-edit">Editar fecho</button></div>';
+    html += '</div>';
+  } else {
+    const day = data.bookings.filter(b=>b.date===date && b.status==='confirmed').sort((a,b)=>a.time.localeCompare(b.time));
+    html += '<div style="margin-top:14px;">';
+    if(day.length===0) html += '<div class="empty-note">Sem marcações confirmadas neste dia.</div>';
+    day.forEach(b=>{
+      const r = closeRows[b.id] || {attended:true, price:0};
+      html += '<div class="req"><div class="top"><span class="who">'+esc(b.time)+' · '+esc(b.name)+'</span>'+
+        '<label style="margin:0;display:flex;gap:6px;align-items:center;font-weight:600;"><input type="checkbox" class="close-att" data-id="'+b.id+'" '+(r.attended?'checked':'')+'> Veio</label></div>'+
+        '<div class="meta">'+esc(b.serviceName||'')+'</div>'+
+        '<div style="display:flex;gap:8px;align-items:center;margin-top:8px;"><span style="font-size:14px;">Valor €</span>'+
+        '<input type="number" class="close-price" data-id="'+b.id+'" min="0" step="0.5" value="'+(Number(r.price)||0)+'" style="max-width:110px;" '+(r.attended?'':'disabled')+'></div></div>';
+    });
+    html += '<div style="margin-top:10px;font-weight:600;font-size:14px;">Serviços sem marcação</div>';
+    closeExtras.forEach((x,i)=>{
+      html += '<div class="blockeddate-row"><span>'+esc(x.serviceName)+' · '+money(x.price)+'</span><button class="rm" data-action="close-extra-rm" data-index="'+i+'">Remover</button></div>';
+    });
+    html += '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;">'+
+      '<select id="extra-svc" style="flex:1;min-width:140px;padding:10px;border:1px solid var(--line);border-radius:8px;">'+
+      data.config.services.map((s,i)=>'<option value="'+i+'">'+esc(s.name)+'</option>').join('')+'</select>'+
+      '<input type="number" id="extra-price" min="0" step="0.5" placeholder="€" style="max-width:90px;">'+
+      '<button class="btn btn-ghost btn-sm" data-action="close-extra-add">+ Adicionar</button></div>';
+    const t = closeTotals(date);
+    html += '<div style="margin-top:16px;padding:12px;background:#FFF0C2;border:2px solid #1D1510;border-radius:8px;font-size:18px;font-weight:700;" id="close-total">'+t.count+' serviço'+(t.count===1?'':'s')+' · '+money(t.total)+'</div>';
+    html += '<div style="margin-top:12px;"><button class="btn btn-primary" data-action="close-save">Fechar o dia</button>'+(saved?' <button class="btn btn-ghost" data-action="close-cancel-edit">Cancelar edição</button>':'')+'</div>';
+    html += '<div class="empty-note" style="margin-top:8px;">Os preços por omissão vêm das Definições (serviços). Só conta quem tem “Veio” marcado.</div>';
+    html += '</div>';
+  }
+
+  html += renderReport();
+  html += '</div>';
+  return html;
+}
+
 // ---------- render ----------
 
 function render(){
@@ -632,8 +939,7 @@ function render(){
   if(!data || !configLoaded || !bookingsLoaded){ root.innerHTML = '<div class="loading">A preparar a agenda…</div>'; return; }
   const cfg = data.config;
   let html = '';
-  html += '<div class="header">';
-  html += '<div class="brandrow"><div><div class="brand">'+esc(cfg.barbershopName)+'</div>';
+  html += '<div class="header"><div class="brandrow"><div><div class="brand">PP <span>Marcações</span></div>';
   html += '<div class="tagline">Painel do barbeiro — uso interno</div></div></div>';
   html += '<div class="stripe"></div></div>';
 
@@ -648,7 +954,7 @@ function renderBarberView(){
   if(!barberUnlocked){
     let html = '<div class="card passgate">';
     html += '<h3>Área reservada</h3>';
-    html += '<p style="color:#5C5346;font-size:14.5px;margin-top:6px;">Introduz o código de acesso do barbeiro.</p>';
+    html += '<p style="color:var(--muted);font-size:14.5px;margin-top:6px;">Introduz o código de acesso do barbeiro.</p>';
     html += '<input type="text" id="pass-input" inputmode="numeric" maxlength="8" value="'+esc(passInput)+'">';
     if(passError) html += '<div class="error-text">Código incorreto.</div>';
     html += '<div><button class="btn btn-primary" data-action="unlock">Entrar</button></div>';
@@ -676,9 +982,9 @@ function renderBarberView(){
       html += '<button class="link-btn" data-action="close-email">Fechar</button>';
       html += '</div>';
     } else {
-      html += '<div class="card" style="border-color:var(--brass);background:#EDE0BD;">';
+      html += '<div class="card" style="border-color:var(--brass);background:#FFF0C2;border:2px solid #1D1510;">';
       html += '<div class="section-title">Não foi possível enviar automaticamente</div>';
-      html += '<p style="color:#5C5346;font-size:13.5px;margin:0 0 10px;">Abriu-se o teu email — se não abriu, copia o texto abaixo e envia manualmente.</p>';
+      html += '<p style="color:var(--muted);font-size:13.5px;margin:0 0 10px;">Abriu-se o teu email — se não abriu, copia o texto abaixo e envia manualmente.</p>';
       html += '<label>Para</label><input type="text" id="email-to" readonly value="'+esc(lastEmail.to)+'">';
       html += '<label>Assunto</label><input type="text" id="email-subject" readonly value="'+esc(lastEmail.subject)+'">';
       html += '<label>Mensagem</label><textarea id="email-body" readonly rows="6">'+esc(lastEmail.body)+'</textarea>';
@@ -688,6 +994,27 @@ function renderBarberView(){
       html += '<button class="btn btn-ghost btn-sm" data-action="close-email">Fechar</button>';
       html += '</div></div>';
     }
+  }
+
+  const changes = confirmed.filter(b=>b.changeRequest);
+  if(changes.length){
+    html += '<div class="card" style="border:2px solid var(--brass);">';
+    html += '<div class="section-title">⚠ Pedidos de alteração ('+changes.length+')</div>';
+    changes.forEach(b=>{
+      const cr = b.changeRequest;
+      const free = generateSlots(cr.date, b.duration, b.id).includes(cr.time);
+      html += '<div class="req">';
+      html += '<div class="top"><span class="who">'+esc(b.name)+'</span><span class="when">'+esc(b.phone||'')+'</span></div>';
+      html += '<div class="meta">'+esc(b.serviceName||'')+(b.location?' · 📍 '+esc(b.location):'')+'</div>';
+      html += '<div style="margin:8px 0;font-size:15px;">Atual: <b>'+fmtDateLong(b.date)+' · '+b.time+'</b><br>Pedido: <b>'+fmtDateLong(cr.date)+' · '+cr.time+'</b></div>';
+      if(cr.reason) html += '<div class="note">"'+esc(cr.reason)+'"</div>';
+      if(!free) html += '<div class="note" style="color:var(--danger);font-style:normal;font-weight:600;">Este horário já não está livre.</div>';
+      html += '<div class="actions">';
+      html += '<button class="btn btn-confirm btn-sm" data-action="accept-change" data-id="'+b.id+'" '+(free?'':'disabled')+'>Aceitar alteração</button>';
+      html += '<button class="btn btn-reject btn-sm" data-action="decline-change" data-id="'+b.id+'">Recusar</button>';
+      html += '</div></div>';
+    });
+    html += '</div>';
   }
 
   html += '<div class="card">';
@@ -738,6 +1065,8 @@ function renderBarberView(){
   }
   html += '</div>';
 
+  html += renderClosing();
+
   if(blocked.length){
     html += '<div class="card">';
     html += '<div class="section-title">Horários bloqueados manualmente ('+blocked.length+')</div>';
@@ -750,7 +1079,7 @@ function renderBarberView(){
 
   html += '<div class="card">';
   html += '<div class="section-title">Bloquear um horário ou período</div>';
-  html += '<p style="color:#5C5346;font-size:14px;margin:0 0 10px;">Escolhe o dia (ou período de dias) e a hora de início e fim a bloquear — útil para pausas, almoços ou parte de um dia.</p>';
+  html += '<p style="color:var(--muted);font-size:14px;margin:0 0 10px;">Escolhe o dia (ou período de dias) e a hora de início e fim a bloquear — útil para pausas, almoços ou parte de um dia.</p>';
   html += '<div class="grid2">';
   html += '<div><label>De</label><input type="date" id="block-start" value="'+esc(blockRangeStart)+'"></div>';
   html += '<div><label>Até (opcional)</label><input type="date" id="block-end" value="'+esc(blockRangeEnd)+'"></div>';
@@ -764,7 +1093,7 @@ function renderBarberView(){
 
   html += '<div class="card">';
   html += '<div class="section-title">Férias / dias sem trabalhar</div>';
-  html += '<p style="color:#5C5346;font-size:14px;margin:0 0 10px;">Bloqueia um dia ou um período inteiro — esses dias deixam de aparecer para marcação.</p>';
+  html += '<p style="color:var(--muted);font-size:14px;margin:0 0 10px;">Bloqueia um dia ou um período inteiro — esses dias deixam de aparecer para marcação.</p>';
   html += '<div class="grid2">';
   html += '<div><label>De</label><input type="date" id="vac-start" value="'+esc(vacStart)+'"></div>';
   html += '<div><label>Até (opcional)</label><input type="date" id="vac-end" value="'+esc(vacEnd)+'"></div>';
@@ -850,7 +1179,7 @@ function renderConfigForm(){
   html += '</div>';
 
   html += '<label>Localização por dia</label>';
-  html += '<p style="color:#6E6455;font-size:13px;margin:-4px 0 8px;">Deixa em branco os dias sem local fixo.</p>';
+  html += '<p style="color:var(--muted);font-size:13px;margin:-4px 0 8px;">Deixa em branco os dias sem local fixo.</p>';
   const locs = cfg.locationsByDay || {};
   [...cfg.workDays].sort((a,b)=>a-b).forEach(day=>{
     html += '<div class="svcrow" data-loc-day="'+day+'">';
@@ -859,11 +1188,12 @@ function renderConfigForm(){
     html += '</div>';
   });
 
-  html += '<label>Serviços e durações</label><div id="svc-list">';
+  html += '<label>Serviços: nome · minutos · preço (€)</label><div id="svc-list">';
   cfg.services.forEach((s,i)=>{
     html += '<div class="svcrow" data-svc-index="'+i+'">';
     html += '<input type="text" class="svc-name" value="'+esc(s.name)+'" placeholder="Nome do serviço">';
-    html += '<input type="number" class="svc-min" min="5" max="240" step="5" value="'+s.minutes+'">';
+    html += '<input type="number" class="svc-min" min="5" max="240" step="5" value="'+s.minutes+'" title="minutos">';
+    html += '<input type="number" class="svc-price" min="0" step="0.5" value="'+(s.price||0)+'" title="preço em €" placeholder="€" style="max-width:80px;">';
     html += '<button type="button" class="rm" data-action="remove-service" data-index="'+i+'">Remover</button>';
     html += '</div>';
   });
@@ -879,6 +1209,24 @@ function renderConfigForm(){
 function attachHandlers(){
   root.querySelectorAll('[data-action]').forEach(el=>{
     el.addEventListener('click', onAction);
+  });
+  const rf = document.getElementById('rep-from');
+  if(rf){ rf.addEventListener('change', ()=>{ repFrom = rf.value; render(); }); }
+  const rt = document.getElementById('rep-to');
+  if(rt){ rt.addEventListener('change', ()=>{ repTo = rt.value; render(); }); }
+  const cd = document.getElementById('close-date');
+  if(cd){ cd.addEventListener('change', ()=>{ closeDate = cd.value; closeInit=''; closeEditing=false; render(); }); }
+  root.querySelectorAll('.close-att').forEach(el=>{
+    el.addEventListener('change', ()=>{ closeRows[el.dataset.id] = closeRows[el.dataset.id] || {attended:true, price:0}; closeRows[el.dataset.id].attended = el.checked; render(); });
+  });
+  root.querySelectorAll('.close-price').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      closeRows[el.dataset.id] = closeRows[el.dataset.id] || {attended:true, price:0};
+      closeRows[el.dataset.id].price = Number(el.value)||0;
+      const t = closeTotals(closeDate || todayKey());
+      const box = document.getElementById('close-total');
+      if(box) box.textContent = t.count+' serviço'+(t.count===1?'':'s')+' · '+money(t.total);
+    });
   });
   const pi = document.getElementById('pass-input');
   if(pi){ pi.addEventListener('input', ()=>{ passInput = pi.value; }); }
@@ -905,7 +1253,8 @@ function readServicesFromForm(){
     if(name && minutes>0){
       const existingIdx = Number(row.dataset.svcIndex);
       const existingId = data.config.services[existingIdx] ? data.config.services[existingIdx].id : null;
-      services.push({id: existingId || ('svc_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)), name, minutes});
+      const price = Number(row.querySelector('.svc-price').value)||0;
+      services.push({id: existingId || ('svc_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)), name, minutes, price});
     }
   });
   return services;
@@ -920,6 +1269,27 @@ function onAction(e){
     else { passError = true; }
     render(); return;
   }
+  if(action==='cmp-metric'){ cmpMetric = el.dataset.v; render(); return; }
+  if(action==='cmp-months'){ cmpMonths = Number(el.dataset.v); render(); return; }
+  if(action==='rep-preset'){
+    repPreset = el.dataset.p;
+    if(repPreset==='custom' && !repFrom){ const [a,b]=repRange(); repFrom=a; repTo=b; }
+    render(); return;
+  }
+  if(action==='accept-change'){ acceptChange(el.dataset.id); return; }
+  if(action==='decline-change'){ declineChange(el.dataset.id); return; }
+  if(action==='toggle-closing'){ showClosing = !showClosing; if(showClosing){ closeInit=''; } render(); return; }
+  if(action==='close-save'){ saveClosing(); return; }
+  if(action==='close-edit'){ closeEditing = true; closeInit=''; render(); return; }
+  if(action==='close-cancel-edit'){ closeEditing = false; closeInit=''; render(); return; }
+  if(action==='close-extra-add'){
+    const idx = Number(document.getElementById('extra-svc').value);
+    const svc = data.config.services[idx];
+    const p = document.getElementById('extra-price').value;
+    closeExtras.push({serviceName: svc.name, price: p!=='' ? Number(p) : (svc.price||0)});
+    render(); return;
+  }
+  if(action==='close-extra-rm'){ closeExtras.splice(Number(el.dataset.index),1); render(); return; }
   if(action==='decide'){ decideBooking(el.dataset.id, el.dataset.decision); return; }
   if(action==='request-cancel'){ requestCancelBooking(el.dataset.id); return; }
   if(action==='dismiss-cancel'){ dismissCancelBooking(); return; }
@@ -950,7 +1320,7 @@ function onAction(e){
   }
   if(action==='add-service'){
     const services = readServicesFromForm();
-    services.push({id:'svc_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), name:'', minutes:30});
+    services.push({id:'svc_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), name:'', minutes:30, price:0});
     data.config.services = services;
     render(); return;
   }
